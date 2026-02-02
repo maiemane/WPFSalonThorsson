@@ -42,6 +42,15 @@ namespace WPFSalonThorsson.UnitTest
 
         public bool DeleteRental(int id) => false;
 
+        public bool HasOverlap(int chairId, DateTime start, DateTime end, int? excludeRentalId = null)
+        {
+            return _fakeDatabase.Any(r =>
+                r.ChairId == chairId &&
+                r.RentalId != excludeRentalId &&
+                start <= r.EndDate && end >= r.StartDate
+            );
+        }
+
         public List<ChairRental> GetUpcomingRentals(DateTime date) => new List<ChairRental>();
         public List<ChairRental> GetCompletedRentals(DateTime date) => new List<ChairRental>();
         public List<ChairRental> GetRentalsByChair(int chairId) => new List<ChairRental>();

@@ -109,6 +109,10 @@ namespace WPFSalonThorsson.Services
             string? dateError = RentalValidator.ValidateSEDate(RentalType.Daglig, date, date);
             if (dateError != null) return new RentalResult(dateError);
 
+            if (_chairRepo.HasOverlap(chairId, date, date))
+            {
+                return new RentalResult($"Stolen er allerede booket denne dato.");
+            }
 
             var rental = new ChairRental
             {
@@ -137,7 +141,14 @@ namespace WPFSalonThorsson.Services
             string? priceError = RentalValidator.ValidatePrice(RentalType.Maanedlig, monthlyPrice);
             if (priceError != null) return new RentalResult(priceError);
 
+            if (_chairRepo.HasOverlap(chairId, startDate, endDate))
+            {
+                return new RentalResult($"Stolen er allerede booket i den valgte periode.");
+            }
+
             decimal calculatedTotal = (decimal)Math.Ceiling((endDate - startDate).TotalDays / 30) * monthlyPrice;
+
+
 
             var rental = new ChairRental
             {
@@ -191,6 +202,11 @@ namespace WPFSalonThorsson.Services
 
             string? priceError = RentalValidator.ValidatePrice(existing.RentalType, existing.Price);
             if (priceError != null) return new RentalResult(priceError);
+
+            if (_chairRepo.HasOverlap(existing.ChairId, existing.StartDate, existing.EndDate, existing.RentalId))
+            {
+                return new RentalResult("Overlap med eksisterende booking");
+            }
 
             if (existing.RentalType == RentalType.Maanedlig)
             {
