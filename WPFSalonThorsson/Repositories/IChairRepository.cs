@@ -19,6 +19,8 @@ namespace SalonT.Repositories
 
         bool ChairExists(int chairId);
 
+        bool HasOverlap(int ChairId, DateTime StartTime, DateTime EndTime, int? excludeRentalId = null);
+
         List<ChairRental> GetUpcomingRentals(DateTime fromDate);
 
         List<ChairRental> GetCompletedRentals(DateTime beforeDate);

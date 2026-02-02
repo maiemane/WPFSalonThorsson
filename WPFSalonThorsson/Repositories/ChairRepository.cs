@@ -195,5 +195,36 @@ namespace Salon.Repositories
             }
             return rentals;
         }
+
+        public bool HasOverlap(int chairId, DateTime startDate, DateTime endDate, int? excludeRentalId = null)
+        {
+            using (SqlConnection conn = DatabaseConnection.GetConnection())
+            {
+                conn.Open();
+
+                string sql = @"
+            SELECT COUNT(1)
+            FROM ChairRentals
+            WHERE ChairId = @ChairId
+              AND StartDate <= @EndDate
+              AND EndDate >= @StartDate";
+
+                if (excludeRentalId.HasValue)
+                    sql += " AND RentalId <> @ExcludeId";
+
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@ChairId", chairId);
+                    cmd.Parameters.AddWithValue("@StartDate", startDate);
+                    cmd.Parameters.AddWithValue("@EndDate", endDate);
+
+                    if (excludeRentalId.HasValue)
+                        cmd.Parameters.AddWithValue("@ExcludeId", excludeRentalId.Value);
+
+                    return (int)cmd.ExecuteScalar() > 0;
+                }
+            }
+        }
+
     }
 }
