@@ -2,6 +2,7 @@
 using Salon.Repositories;
 using Microsoft.Data.SqlClient;
 using System;
+using SalonT.Repositories;
 
 namespace WPFSalonThorsson.Services
 {
@@ -17,14 +18,22 @@ namespace WPFSalonThorsson.Services
 
             return null;
         }
+
+        public static string? ValidateSEDate(RentalType type, DateTime startDate, DateTime endDate)
+        {
+            if (type == RentalType.Maanedlig && startDate > endDate)
+                return "´Startdatoen skal være før slutdatoen";
+
+            return null;
+        }
     }
 
     public class RentalService
     {
-        private readonly ChairRepository _chairRepo;
-        private readonly RenterRepository _renterRepo;
+        private readonly IChairRepository _chairRepo;
+        private readonly IRenterRepository _renterRepo;
 
-        public RentalService(ChairRepository chairRepo)
+        public RentalService(IChairRepository chairRepo, IRenterRepository renterRepo)
         {
             _chairRepo = chairRepo;
             _renterRepo = new RenterRepository();
@@ -97,6 +106,10 @@ namespace WPFSalonThorsson.Services
             string? priceError = RentalValidator.ValidatePrice(RentalType.Daglig, dailyPrice);
             if (priceError != null) return new RentalResult(priceError);
 
+            string? dateError = RentalValidator.ValidateSEDate(RentalType.Daglig, date, date);
+            if (dateError != null) return new RentalResult(dateError);
+
+
             var rental = new ChairRental
             {
                 ChairId = chairId,
@@ -118,7 +131,8 @@ namespace WPFSalonThorsson.Services
             if (!_chairRepo.ChairExists(chairId))
                 return new RentalResult($"Stol {chairId} eksisterer ikke");
 
-            if (endDate < startDate) return new RentalResult("Slutdato er før startdato");
+            string? dateError = RentalValidator.ValidateSEDate(RentalType.Maanedlig, startDate, endDate);
+            if (dateError != null) return new RentalResult(dateError);
 
             string? priceError = RentalValidator.ValidatePrice(RentalType.Maanedlig, monthlyPrice);
             if (priceError != null) return new RentalResult(priceError);
@@ -171,6 +185,12 @@ namespace WPFSalonThorsson.Services
             existing.EndDate = updateData.EndDate ?? existing.EndDate;
             existing.Price = updateData.Price ?? existing.Price;
             existing.PaymentStatus = updateData.PaymentStatus ?? existing.PaymentStatus;
+
+            string? dateError = RentalValidator.ValidateSEDate(existing.RentalType, existing.StartDate, existing.EndDate);
+            if (dateError != null) return new RentalResult(dateError);
+
+            string? priceError = RentalValidator.ValidatePrice(existing.RentalType, existing.Price);
+            if (priceError != null) return new RentalResult(priceError);
 
             if (existing.RentalType == RentalType.Maanedlig)
             {

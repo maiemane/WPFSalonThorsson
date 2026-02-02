@@ -1,9 +1,10 @@
-﻿using WPFSalonThorsson.Models;
-using WPFSalonThorsson.Services;
-using Salon.Repositories;
+﻿using Salon.Repositories;
+using SalonT.Repositories;
 using System;
-using System.Text;
 using System.Collections.Generic;
+using System.Text;
+using WPFSalonThorsson.Models;
+using WPFSalonThorsson.Services;
 
 namespace WPFSalonThorsson
 {
@@ -12,8 +13,9 @@ namespace WPFSalonThorsson
         static void Main1()
         {
             Console.OutputEncoding = Encoding.Unicode;
+            IRenterRepository renterRepo = new RenterRepository();
             var chairRepo = new ChairRepository();
-            var rentalService = new RentalService(chairRepo);
+            var rentalService = new RentalService(chairRepo, renterRepo);
 
             while (true)
             {

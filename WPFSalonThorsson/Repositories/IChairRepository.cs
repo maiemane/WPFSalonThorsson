@@ -17,6 +17,8 @@ namespace SalonT.Repositories
 
         bool DeleteRental(int rentalId);
 
+        bool ChairExists(int chairId);
+
         List<ChairRental> GetUpcomingRentals(DateTime fromDate);
 
         List<ChairRental> GetCompletedRentals(DateTime beforeDate);
